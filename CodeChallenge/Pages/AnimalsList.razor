@@ -1,0 +1,68 @@
+﻿@page "/listaAnimales"
+@inject IAnimalService  AnimalService
+
+@Message
+
+<h1>Lista Animales</h1>
+
+@if (animals == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Tipo</th>
+                <th>Especie</th>
+                <th>Edad</th>
+                <th>Lugar de Origen</th>
+                <th>Peso</th>
+                <th>Kilos</th>
+                <th>Total Carne/Mes</th>
+                <th>Total Hierba/Mes</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var animal in animals)
+            {
+                <tr>
+                    <td>@animal.Id</td>
+                    <td>@animal.Tipo</td>
+                    <td>@animal.Especie</td>
+                    <td>@animal.Edad</td>
+                    <td>@animal.LugarOrigen</td>
+                    <td>@animal.Peso</td>
+                    <td>@animal.Kilos</td>
+                    <td>@animal.TotalCarneMes.ToString("#.##")</td>
+                    <td>@animal.TotalHierbaMes.ToString("#.##")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+
+
+@code {
+    public IEnumerable<Animal> animals { get; set; }
+    public string Message { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            animals = await AnimalService.GetAllAnimals();
+        }
+        catch (Exception e)
+        {
+            Message = e.Message;
+        }
+    }
+
+
+
+}

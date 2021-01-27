@@ -1,0 +1,135 @@
+﻿@page "/nuevoAnimal"
+@inject IAnimalService AnimalService
+@inject IToastService toastService
+@inject NavigationManager NavManager
+
+<h3>Nuevo Animal</h3>
+<EditForm Model="@animal" OnValidSubmit="InsertAnimal">
+    <div class="form-group row justify-content-center">
+        <div class="col-8">
+            <div class="card">
+                <div class="card-body">
+                    <div class="form-group row justify-content-center">
+                        <div class="col-2">
+                            <label class="col-form-label">Tipo</label>
+                        </div>
+                        <div class="col-4">
+                            <select @bind="animal.Tipo" class="form-control">
+                                <option value="">-- Seleccionar Tipo --</option>
+                                @foreach (AnimalType tipo in (AnimalType[])Enum.GetValues(typeof(AnimalType)))
+                                {
+                                    <option value="@tipo">@tipo</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row justify-content-center">
+                        <div class="col-2">
+                            <label class="col-form-label">Especie</label>
+                        </div>
+                        <div class="col-4">
+                            <input type="text" class="form-control" @bind="animal.Especie" />
+                        </div>
+                    </div>
+                    <div class="form-group row justify-content-center">
+                        <div class="col-2">
+                            <label class="col-form-label">Edad</label>
+                        </div>
+                        <div class="col-4">
+                            <input type="number" class="form-control" @bind="animal.Edad" />
+                        </div>
+                    </div>
+                    <div class="form-group row justify-content-center">
+                        <div class="col-2">
+                            <label class="col-form-label">Lugar de Origen</label>
+                        </div>
+                        <div class="col-4">
+                            <input type="text" class="form-control" @bind="animal.LugarOrigen" />
+                        </div>
+                    </div>
+                    <div class="form-group row justify-content-center">
+                        <div class="col-2">
+                            <label class="col-form-label">Peso</label>
+                        </div>
+                        <div class="col-4">
+                            <input type="number" class="form-control" @bind="animal.Peso" />
+                        </div>
+                    </div>
+                    @if (animal.Tipo == AnimalType.Carnívoro.ToString() || animal.Tipo == AnimalType.Reptil.ToString())
+                    {
+                        <div class="form-group row justify-content-center">
+                            <div class="col-2">
+                                <label class="col-form-label">Porcentaje</label>
+                            </div>
+                            <div class="col-4">
+                                <input type="number" class="form-control" @bind="animal.Porcentaje" />
+                            </div>
+                        </div>
+                    }
+                    @if (animal.Tipo == AnimalType.Herbívoro.ToString())
+                    {
+                        <div class="form-group row justify-content-center">
+                            <div class="col-2">
+                                <label class="col-form-label">Kilos</label>
+                            </div>
+                            <div class="col-4">
+                                <input type="number" class="form-control" @bind="animal.Kilos" />
+                            </div>
+                        </div>
+                    }
+                    @if (animal.Tipo == AnimalType.Reptil.ToString())
+                    {
+                        <div class="form-group row justify-content-center">
+                            <div class="col-2">
+                                <label class="col-form-label">Periodo Cambio Piel en Dias</label>
+                            </div>
+                            <div class="col-4">
+                                <input type="number" class="form-control" @bind="animal.CambioPiel" />
+                            </div>
+                        </div>
+                    }
+
+                    <div class="form-group row">
+                        <div class="col-12 d-flex justify-content-center">
+                            <button type="button" class="btn btn-success" @onclick="InsertAnimal">Agregar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    
+    protected Animal animal = new Animal();
+    
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+
+    protected async Task InsertAnimal()
+    {
+        animal.CalcularAlimento();
+
+        bool isAdded = await AnimalService.InsertAnimal(animal);
+        if (isAdded)
+        {
+            toastService.ShowSuccess("El animal fue agregado correctamente", "SUCCESS");
+        }
+
+        var animals = await AnimalService.GetAllAnimals();
+        double monthlyTotal = animals.Sum(x => x.TotalCarneMes + x.TotalHierbaMes);
+
+        if (monthlyTotal > 1500D)
+        {
+            toastService.ShowWarning("Total mensual de comida excederá los 1.500 Kg.");
+        }
+        NavManager.NavigateTo("/listaAnimales");
+
+    }
+}

@@ -1,0 +1,47 @@
+﻿@page "/totalMes"
+@inject IAnimalService  AnimalService
+
+@Message
+
+<h1>Total Mensual en Kg.</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Tipo</th>
+            <th scope="col">Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th scope="row">Carne</th>
+            <td>@totalCarne.ToString("#.##")</td>
+        </tr>
+        <tr>
+            <th scope="row">Hierba</th>
+            <td>@totalHierba.ToString("#.##")</td>
+        </tr>
+    </tbody>
+</table>
+
+@code {
+    public IEnumerable<Animal> animals { get; set; }
+    public double totalCarne { get; set; }
+    public double totalHierba { get; set; }
+    public string Message { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            animals = await AnimalService.GetAllAnimals();
+            totalCarne = animals.Sum(a => a.TotalCarneMes);
+            totalHierba = animals.Sum(a => a.TotalHierbaMes);
+        }
+        catch (Exception e)
+        {
+            Message = e.Message;
+        }
+    }
+
+}
